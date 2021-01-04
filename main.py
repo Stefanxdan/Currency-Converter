@@ -3,7 +3,9 @@ import json
 import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
+from datetime import datetime
 import os
+
 
 text = os.system("scrapy runspider crawler.py")
 
@@ -15,7 +17,7 @@ ratio = 1
 modifiedByUser = True
 
 
-def entry_callback(stringVar, second_stringVar):
+def entry_callback(stringVar, second_stringVar, inmultire):
     global modifiedByUser
     if not modifiedByUser:
         print("entry callback: canceled")
@@ -24,23 +26,11 @@ def entry_callback(stringVar, second_stringVar):
     print("entry callback:" + stringVar.get())
     modifiedByUser = False
     try:
-        second_stringVar.set(round(float(stringVar.get()) * ratio, 3))
-    except:
-        second_stringVar.set(0)
-    finally:
-        print(ratio)
-
-
-def entry_callback2(stringVar, second_stringVar):
-    global modifiedByUser
-    if not modifiedByUser:
-        print("entry callback: canceled")
-        modifiedByUser = True
-        return
-    print("entry callback:" + stringVar.get())
-    modifiedByUser = False
-    try:
-        second_stringVar.set(round(float(stringVar.get()) / ratio, 3))
+        if inmultire:
+            result = round(float(stringVar.get()) * ratio, 3)
+        else:
+            result = round(float(stringVar.get()) / ratio, 3)
+        second_stringVar.set(result)
     except:
         second_stringVar.set(0)
     finally:
@@ -61,6 +51,11 @@ def comboBoxCallBack(event, firstBox, secondBox, entry):
 def buttonAction(entry1, entry2):
     entry1.set(entry2.get())
 
+def RunSpiderCallBack():
+    os.system("scrapy runspider crawler.py")
+    global timeLabel
+    timeLabel['text'] = "Last update " + datetime.now().strftime("%H:%M:%S")
+
 
 window = tk.Tk()
 window.title("Currency Converter")
@@ -77,8 +72,8 @@ comboBox1.current(0)
 
 tk.Label(text="Amount", font=15).place(x=50, y=150)
 stringVar1 = tk.StringVar()
-stringVar1.trace('w', lambda name, index, mode, stringVar1=stringVar1: entry_callback(stringVar1, stringVar2))
-entry1 = tk.Entry(window, textvariable=stringVar1, font=15, width=15).place(x=130, y=150)
+stringVar1.trace('w', lambda name, index, mode, stringVar1=stringVar1: entry_callback(stringVar1, stringVar2, True))
+entry1 = tk.Entry(window, textvariable=stringVar1, font=15, width=13).place(x=130, y=150)
 
 ######## # # # # # # Right side # # # # # # ########
 tk.Label(text="Currency", font=15).place(x=390, y=70)
@@ -89,8 +84,8 @@ comboBox2.current(0)
 
 tk.Label(text="Amount", font=15).place(x=400, y=150)
 stringVar2 = tk.StringVar()
-stringVar2.trace('w', lambda name, index, mode, stringVar2=stringVar2: entry_callback2(stringVar2, stringVar1))
-entry2 = tk.Entry(window, textvariable=stringVar2, font=15, width=15).place(x=480, y=150)
+stringVar2.trace('w', lambda name, index, mode, stringVar2=stringVar2: entry_callback(stringVar2, stringVar1, False))
+entry2 = tk.Entry(window, textvariable=stringVar2, font=15, width=13).place(x=480, y=150)
 
 ######## # # # # # # Central # # # # # # ########
 arrow_left = Image.open('arrow_left.png')
@@ -104,6 +99,12 @@ arrow_right = arrow_right.resize((50, 50), Image.ANTIALIAS)
 my_arrow_right = ImageTk.PhotoImage(arrow_right)
 tk.Button(master=window, text='press', command=lambda: buttonAction(stringVar2, stringVar1),
           image=my_arrow_right).place(x=300, y=125)
+
+my_string = "Last update " + datetime.now().strftime("%H:%M:%S")
+timeLabel = tk.Label(text=my_string)
+timeLabel.place(x=270, y=245)
+button = tk.Button(master=window, text='RunSpider', command=RunSpiderCallBack)
+button.place(x=295, y=210)
 
 ####
 comboBox1.bind("<<ComboboxSelected>>",
