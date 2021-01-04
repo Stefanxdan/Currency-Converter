@@ -3,6 +3,9 @@ import json
 import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
+import os
+
+text = os.system("scrapy runspider crawler.py")
 
 with open('output.json') as json_file:
     data = json.load(json_file)
